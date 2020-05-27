@@ -1,28 +1,28 @@
-pragma solidity 0.6.6;
+pragma solidity ^0.6.0;
 
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/Address.sol";
-import "./token.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/GSN/Context.sol";
 
-contract buyable is ERC20Basic
+contract buyable is ERC20
 {
-    address buyer;
-    ERC20Basic public token;
+   address payable public owner;
+    address payable buyer;
+    ERC20 public _token;
     uint256 public tokenPrice;
-    uint256 public tokensSold;
+    uint256 public tokensSold=0;
     uint256 public amountobuy;
     event sell(address buyer, uint256 amount);
     
-constructor(ERC20Basic _token) public
+constructor(ERC20 token) ERC20("Buyable Token", "BUYT") public payable
 {
-    token=_token;
-    buyer =msg.sender;
+    //token=_token;
+    _token = token;
+    owner=msg.sender;
     tokenPrice=100;
 }
 
-fallback() isEOA external payable
-{
-    msg.sender.transfer(msg.value);
-}
+
 
 function isContract(address account) internal view returns (bool) {
         // According to EIP-1052, 0x0 is the value returned for not-yet created accounts
@@ -35,19 +35,15 @@ function isContract(address account) internal view returns (bool) {
         return (codehash != accountHash && codehash != 0x0);
     }
 
-modifier isEOA()
-{
-    if(isContract(buyer) == false)
-    _;
-}
 
-function buyTokens(uint _numberOfTokens) public payable
+
+function buyTokens(uint _numberOfTokens) payable external
 {
-    amountobuy = msg.value;
-    _numberOfTokens = (msg.value*decimals)/(tokenPrice);
-    tokensSold += amountobuy;
-    token.transfer(msg.sender,amountobuy);
-    emit sell(msg.sender, _numberOfTokens);
+    
+    uint256 amount = _numberOfTokens*tokenPrice;
+    _token.transfer(_msgSender(),amount);
+    tokensSold += _numberOfTokens;
+    emit sell(buyer, _numberOfTokens);
 }
 
    
