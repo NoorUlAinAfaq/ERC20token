@@ -50,6 +50,12 @@ function buyTokens(uint _numberOfTokens) isEOA payable external
     tokensSold += _numberOfTokens;
     emit sell(msg.sender, _numberOfTokens);
 }
+function adjustPrice(uint256 newPrice) onlyOwner public
+{
+    tokenPrice=newPrice;
+    
+}
+
 
 
    
