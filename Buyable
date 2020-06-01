@@ -9,19 +9,22 @@ import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contr
 
 contract buyable is ERC20Basic
 {
-   address payable public owner;
+   address public owner;
    address buyer;
+   address delegate;
     ERC20Basic public token;
     uint256 public tokenPrice;
     uint256 public tokensSold=0;
     uint256 public amountobuy;
     event sell(address owner , uint256 amount);
-    
-constructor(ERC20Basic _token) public payable
+    event ownerShipTransferred(address owner,address newOwner);
+constructor()
+ERC20Basic("My Buyable Token","BTK") public payable
 {
-    token=_token;
-    owner=msg.sender;
-    tokenPrice=100;
+         owner = msg.sender;
+       
+        
+        
 }
 
 
@@ -50,13 +53,35 @@ function buyTokens(uint _numberOfTokens) isEOA payable external
     tokensSold += _numberOfTokens;
     emit sell(msg.sender, _numberOfTokens);
 }
+
 function adjustPrice(uint256 newPrice) onlyOwner public
 {
     tokenPrice=newPrice;
     
 }
 
+function transferOwnerShip(address newOwner) onlyOwner public
+{
+    require(newOwner != address(0));
+    owner= newOwner;
+    emit ownerShipTransferred(owner, newOwner);
+}
 
+     function setDelegate(address  _delegate) public onlyOwner returns (address) {
+     delegate= _delegate;
+    }
+    
+    // restrict a function to only owner or delegate
+     modifier onlyOwnerOrDelegate(){
+        require(msg.sender == owner || msg.sender == delegate ,"BCC1: Only owner or delegate can execute this feature");
+        _;
+    }
+    
+    
+    function setPrice(uint256  _tokenPrice) public onlyOwnerOrDelegate returns (uint8) {
+     tokenPrice= _tokenPrice;
+    
+    }
 
    
 }
